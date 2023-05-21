@@ -34,6 +34,7 @@ const {
     deletePost,
     getAllCommentsOfPost,
     likePost,
+    getAllLikesOfPost,
 } = require('../controllers/post.controllers');
 const passportJWT = passport.authenticate('jwt', { session: false }, null);
 const passportAdminJWT = passport.authenticate('admin', { session: false }, null);
@@ -107,4 +108,6 @@ postRouter.get('/:id/comments', getAllCommentsOfPost);
  * Route for update likes of a post.
  */
 postRouter.post('/:id/like', passportJWT, likePost);
+
+postRouter.get('/:id/likes', getAllLikesOfPost);
 module.exports = postRouter;

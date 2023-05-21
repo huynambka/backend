@@ -17,7 +17,7 @@ const { NotFoundError, CreateResourceError, UnauthenticatedError } = require('..
  */
 const register = async (req, res, next) => {
     const role = req.body.role;
-    if (role !== 'user') {
+    if (role && role !== 'user') {
         return next(new UnauthenticatedError('You cannot register as admin'));
     }
     const user = await User.create({ ...req.body });

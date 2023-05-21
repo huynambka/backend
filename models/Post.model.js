@@ -19,13 +19,12 @@ const PostSchema = new mongoose.Schema({
         ref: 'User',
         required: [true, 'Author is required'],
     },
-    likes_amount: {
-        type: Number,
-        default: 0,
-    },
-    comments_amount: {
-        type: Number,
-        default: 0,
+    post_likes: {
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }],
+        default: [],
     },
     post_comments: {
         type: [{

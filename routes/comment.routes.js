@@ -14,7 +14,7 @@
  @requires ../controllers/auth.controllers
  */
 const express = require('express');
-const passport = require('passport');
+const passport = require('../config/passport');
 const { createComment, deleteComment, updateComment } = require('../controllers/comment.controllers');
 const { updatePostComments } = require('../controllers/post.controllers');
 const commentRouter = express.Router();

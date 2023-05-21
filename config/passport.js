@@ -45,11 +45,6 @@ passport.use(
         },
         async (req, jwtPayload, done) => {
             const user = await User.findById(jwtPayload.userId);
-            // Check if user is authenticated and if user is admin
-            // If not, return an error
-            if (user._id !== req.params.id && user.role !== 'admin') {
-                return done(new UnauthenticatedError('Unauthenticated'));
-            }
             if (!user) {
                 return done(new UnauthenticatedError('Unauthenticated'));
             }

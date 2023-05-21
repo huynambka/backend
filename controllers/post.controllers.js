@@ -76,11 +76,12 @@ const getPostById = async (req, res, next) => {
  * @returns {Promise<*>}
  */
 const createNewPost = async (req, res, next) => {
-    const post = {
+    const createdPost = {
         ...req.body,
     };
-    const createdPost = await Post.create(post);
-    if (!createdPost) {
+    createdPost.author_id = req.user.userId;
+    const post = await Post.create(createdPost);
+    if (!post) {
         return next(new CreateResourceError('Some thing went wrong while creating post'));
     }
     res.status(StatusCodes.CREATED).json({ post });
@@ -170,6 +171,7 @@ const getAllCommentsOfPost = async (req, res, next) => {
     });
 
 };
+
 /**
  * Controller to update a comment of a post
  * This function handles the request to update a comment of a post.
@@ -184,39 +186,68 @@ const updatePostComments = async (req, res) => {
     const newCommentId = req.newComment.id;
     // If the request is a POST request, add the new comment to the post_comments array
     if (req.method === 'POST') {
-        const { comments_amount } = await Post.findById(postId).select('comments_amount');
         const { post_comments } = await Post.findById(postId).select('post_comments');
         post_comments.push(newCommentId);
         const post = await Post.findByIdAndUpdate(postId, {
-            comments_amount: comments_amount + 1, // Increase comments_amount by 1
             post_comments: post_comments, // Add newCommentId to post_comments
         }, { new: true });
-        res.status(StatusCodes.OK).json({ post });
+        res.status(StatusCodes.CREATED).json({
+            status: 'Create comment successfully',
+            post_comments: post.post_comments,
+        });
     }
     // If the request is a DELETE request, remove the deleted comment from the post_comments array
     if (req.method === 'DELETE') {
         const deletedCommentId = req.params.id;
-        const { comments_amount } = await Post.findById(postId).select('comments_amount');
         const { post_comments } = await Post.findById(postId).select('post_comments');
         post_comments.slice(post_comments.indexOf(deletedCommentId), 1);
         const post = await Post.findByIdAndUpdate(postId, {
-            comments_amount: comments_amount - 1, // Decrease comments_amount by 1
             post_comments: post_comments, // Remove deletedCommentId from post_comments
         }, { new: true });
-        res.status(StatusCodes.OK).json({ post });
+        res.status(StatusCodes.OK).json({ status: 'Delete comment successfully', post_comments: post.post_comments });
     }
 };
+/**
+ * Controller to like a post
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
 const likePost = async (req, res, next) => {
     const postId = req.params.id;
-    const { likes_amount } = await Post.findById(postId).select('likes_amount');
-    console.log(likes_amount);
-    const post = await Post.findByIdAndUpdate(postId, {
-        likes_amount: likes_amount + 1, // Increase likes_amount by 1
-    }, { new: true });
+    const userId = req.user.userId;
+    const post = await Post.findById(postId);
     if (!post) {
         return next(new NotFoundError(`No post with id: ${postId} found`));
     }
-    res.status(StatusCodes.OK).json({ post });
+    const { post_likes } = await Post.findById(postId).select('post_likes');
+    if (post_likes.includes(userId)) {
+        post_likes.splice(post_likes.indexOf(userId), 1);
+    } else {
+        post_likes.push(userId);
+    }
+    const updatedPost = await Post.findByIdAndUpdate(postId, {
+        post_likes,
+    });
+    console.log(updatedPost);
+    res.status(StatusCodes.OK).json({ post_likes });
+};
+/**
+ * Controller to get total likes of a post
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*>}
+ */
+const getAllLikesOfPost = async (req, res, next) => {
+    const postId = req.params.id;
+    const post = await Post.findById(postId).select('post_likes');
+    if (!post) {
+        return next(new NotFoundError(`No post with id: ${postId} found`));
+    }
+    const total = post.post_likes.length;
+    res.status(StatusCodes.OK).json({ total });
 };
 module.exports = {
     getAllPosts,
@@ -227,4 +258,5 @@ module.exports = {
     updatePostComments,
     getAllCommentsOfPost,
     likePost,
+    getAllLikesOfPost,
 };

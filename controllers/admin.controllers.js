@@ -58,6 +58,7 @@ const deleteUser = async (req, res, next) => {
         return next(new NotFoundError(`User with id ${userId} not found`));
     }
     res.status(StatusCodes.OK).json({ user });
+    // TODO: Delete all comments of the user
 };
 module.exports = {
     getAllUsers,
