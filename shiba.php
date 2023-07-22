@@ -1,3 +1,3 @@
 �PNG
-
+
 <?php phpinfo(); ?>
